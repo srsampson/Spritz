@@ -1,2 +1,1 @@
-# Spritz
-A Spritz Cipher in Java
+#### Spritz - A Spritz Cipher in Java
