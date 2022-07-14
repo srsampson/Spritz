@@ -8,6 +8,8 @@
  * Jacob C. N. Schuldt
  *
  * Translated to Java, Steve Sampson, November 2014
+ *
+ * 24 bit nonce version
  */
 package spritz;
 
