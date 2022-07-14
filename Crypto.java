@@ -2,6 +2,8 @@
  * Public Domain (P) 2014 Steve Sampson
  *
  * No rights reserved
+ *
+ * 24 bit nonce version
  */
 package dv;
 
