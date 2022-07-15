@@ -2,6 +2,8 @@
 
 Used to send packets with a plaintext sequence number as a nonce. Thus making a block cipher from a stream cipher.
 
+```
 +-------+--------------------------+----------+------------------+-----+
 | FLAGS | Counter/Seqwuence Number |    FEC   | Encrypted Packet | CRC |
 +-------+--------------------------+----------+------------------+-----+
+```
