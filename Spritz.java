@@ -1,15 +1,14 @@
 /*
- * Spritz
- * A spongy RC4-like stream cipher and hash function
+ * Spritz.java
  *
- * Public Domain (P) October, 2014
+ * A spongy RC4-like stream cipher and hash function
  *
  * Ronald L. Rivest
  * Jacob C. N. Schuldt
  *
- * Translated to Java, Steve Sampson, November 2014
+ * Programmers: Steve Sampson, 2014
  */
-package spritz;
+package ofdm;
 
 public final class Spritz {
 
@@ -21,6 +20,7 @@ public final class Spritz {
     private short z_register;
     private short a_register;
     private short w_register;
+    //
     private byte[] S_BOX;
     //
     private short i_register_p;
@@ -29,6 +29,7 @@ public final class Spritz {
     private short z_register_p;
     private short a_register_p;
     private short w_register_p;
+    //
     private byte[] S_BOX_P;
 
     public Spritz() {
@@ -59,6 +60,7 @@ public final class Spritz {
         z_register_p = z_register;
         a_register_p = a_register;
         w_register_p = w_register;
+        
         S_BOX_P = S_BOX.clone();
     }
 
@@ -73,6 +75,7 @@ public final class Spritz {
         z_register = z_register_p;
         a_register = a_register_p;
         w_register = w_register_p;
+        
         S_BOX = S_BOX_P.clone();
     }
 
@@ -97,14 +100,14 @@ public final class Spritz {
         i_register = (short) temp1;
 
         int temp2 = S_BOX[i_register];
-        temp2 = (j_register + (temp2 < 0 ? 256 + temp2 : temp2)) & 0xFF;
+        temp2 = (j_register + (temp2 < 0 ? N + temp2 : temp2)) & 0xFF;
 
         int temp3 = S_BOX[temp2];
-        temp3 = k_register + (temp3 < 0 ? 256 + temp3 : temp3);
+        temp3 = k_register + (temp3 < 0 ? N + temp3 : temp3);
         j_register = (short) (temp3 & 0xFF);
 
         int temp4 = S_BOX[j_register];
-        temp4 = temp4 < 0 ? 256 + temp4 : temp4;
+        temp4 = temp4 < 0 ? N + temp4 : temp4;
 
         int temp5 = (i_register + k_register) & 0xFF;
         k_register = (short) ((temp5 + temp4) & 0xFF);
@@ -113,7 +116,7 @@ public final class Spritz {
     }
 
     private void whip() {
-        for (int loop = 0; loop < N * 2; loop++) {
+        for (int loop = 0; loop < (N * 2); loop++) {
             update();
         }
 
@@ -124,8 +127,8 @@ public final class Spritz {
         for (int loop = 0; loop < N / 2; loop++) {
             int temp = ((N - 1) - loop) & 0xFF;
 
-            int c1 = (S_BOX[loop] < 0 ? 256 + S_BOX[loop] : S_BOX[loop]);
-            int c2 = (S_BOX[temp] < 0 ? 256 + S_BOX[temp] : S_BOX[temp]);
+            int c1 = (S_BOX[loop] < 0 ? N + S_BOX[loop] : S_BOX[loop]);
+            int c2 = (S_BOX[temp] < 0 ? N + S_BOX[temp] : S_BOX[temp]);
 
             if (c1 > c2) {
                 swap(loop, temp);
@@ -139,6 +142,7 @@ public final class Spritz {
         whip();
         crush();
         whip();
+        
         a_register = 0;
     }
 
@@ -158,6 +162,7 @@ public final class Spritz {
         }
 
         swap(a_register, (N / 2 + val1) & 0xFF);
+        
         a_register = (short) ((a_register + 1) & 0xFF);
     }
 
@@ -168,7 +173,7 @@ public final class Spritz {
 
     public void absorb(byte[] array) {
         for (int loop = 0; loop < array.length; loop++) {
-            absorbByte((array[loop] < 0 ? 256 + array[loop] : array[loop]));
+            absorbByte((array[loop] < 0 ? N + array[loop] : array[loop]));
         }
     }
 
@@ -191,25 +196,75 @@ public final class Spritz {
         int temp1 = (z_register + k_register) & 0xFF;
 
         int temp2 = S_BOX[temp1];
-        temp2 = (i_register + (temp2 < 0 ? 256 + temp2 : temp2)) & 0xFF;
+        temp2 = (i_register + (temp2 < 0 ? N + temp2 : temp2)) & 0xFF;
 
         int temp3 = S_BOX[temp2];
-        temp3 = (j_register + (temp3 < 0 ? 256 + temp3 : temp3)) & 0xFF;
+        temp3 = (j_register + (temp3 < 0 ? N + temp3 : temp3)) & 0xFF;
 
         int temp4 = S_BOX[temp3];
-        temp4 = temp4 < 0 ? 256 + temp4 : temp4;
+        temp4 = temp4 < 0 ? N + temp4 : temp4;
 
         z_register = (short) temp4;
 
         return temp4;
     }
 
+    /**
+     * Compute a Hash value for the given message array.
+     * 
+     * @param array 8-bit unsigned bytes - (N - 1) bytes maximum
+     * @param length Number of bytes in array
+     * @return Hash of length N bytes maximum
+     */
     public byte[] hash(byte[] array, int length) {
-        initialize();
+        initialize();       // init the S Box
 
-        int hashlen = (length > 255) ? 255 : length;
+        /*
+         * Leave room for the hashlen byte
+         * i.e., hash array is N bytes max
+         */
+        int hashlen = (length > (N - 1)) ? (N - 1) : length;
         byte[] output = new byte[hashlen];
 
+        /*
+         * Note, we don't key the S-Box
+         */
+        absorb(array);
+        absorbStop();
+        absorbByte(hashlen);
+        squeeze(output);
+
+        return output;
+    }
+
+    /**
+     * Compute a MAC value for the given message array.
+     * 
+     * @param key 8-bit unsigned bytes cipher key - (N / 8) bytes maximum
+     * @param array 8-bit unsigned bytes - (N - 1) bytes maximum
+     * @param length Number of bytes in message array
+     * @return MAC of length N bytes maximum
+     */
+    public byte[] mac(byte[] key, byte[] array, int length) {
+        initialize();       // init the S Box
+
+        int keylen = (key.length > (N / 8)) ? (N / 8) : key.length;
+        byte[] keyp = new byte[keylen];
+        
+        for (int loop = 0; loop < keylen; loop++) {
+            keyp[loop] = key[loop];
+        }
+
+        /*
+         * Leave room for the hashlen byte
+         * i.e., hash array is N bytes max
+         */
+        int hashlen = (length > (N - 1)) ? (N - 1) : length;
+        byte[] output = new byte[hashlen];
+
+
+        absorb(keyp);
+        absorbStop();
         absorb(array);
         absorbStop();
         absorbByte(hashlen);
