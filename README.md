@@ -4,6 +4,6 @@ Used to send packets with a plaintext sequence number as a nonce. Thus making a 
 
 ```
 +-------+--------------------------+----------+------------------+-----+
-| FLAGS | Counter/Seqwuence Number |    FEC   | Encrypted Packet | CRC |
+| FLAGS | Counter/Seqeuence Number |    FEC   | Encrypted Packet | CRC |
 +-------+--------------------------+----------+------------------+-----+
 ```
