@@ -1,3 +1,7 @@
 #### Spritz - A Spritz Cipher in Java
 
-Used to send packets with a sequence number nonce. Thus making the stream cipher into a block cipher.
+Used to send packets with a plaintext sequence number as a nonce. Thus making a block cipher from a stream cipher.
+
++-------+--------------------------+----------+------------------+-----+
+| FLAGS | Counter/Seqwuence Number |    FEC   | Encrypted Packet | CRC |
++-------+--------------------------+----------+------------------+-----+
