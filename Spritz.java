@@ -8,7 +8,6 @@
  *
  * Programmers: Steve Sampson, 2014
  */
-package ofdm;
 
 public final class Spritz {
 
