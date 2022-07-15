@@ -250,9 +250,7 @@ public final class Spritz {
         int keylen = (key.length > (N / 8)) ? (N / 8) : key.length;
         byte[] keyp = new byte[keylen];
         
-        for (int loop = 0; loop < keylen; loop++) {
-            keyp[loop] = key[loop];
-        }
+        System.arraycopy(key, 0, keyp, 0, keylen);
 
         /*
          * Leave room for the hashlen byte
@@ -260,7 +258,6 @@ public final class Spritz {
          */
         int hashlen = (length > (N - 1)) ? (N - 1) : length;
         byte[] output = new byte[hashlen];
-
 
         absorb(keyp);
         absorbStop();
