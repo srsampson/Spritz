@@ -1,7 +1,7 @@
 /*
- * RC4.java
+ * RC4-CM.java
  *
- * Modified 56-bit key RC4 crypto algorithm
+ * Modified 56-bit key RC4 crypto algorithm with Counter Mode
  *
  */
 
