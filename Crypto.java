@@ -5,29 +5,33 @@
  *
  * 24 bit nonce version
  */
-package dv;
 
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
-import spritz.Spritz;
 
 public final class Crypto {
 
+    private static final int KEYBYTES = 16;
+    //
     private final SecureRandom random; // only used to generate seed
     private int SN;                    // sequence number  (000000..FFFFFF)
     private final Spritz spritz;       // cipher engine
     private final byte[] iv;
 
-    public Crypto() {
+    public Crypto24() {
         spritz = new Spritz();
         iv = new byte[3];
         random = new SecureRandom();
-        random.generateSeed(16);
+        random.generateSeed(KEYBYTES);
     }
 
+    /*
+     * We decide here that 128 bit keys are sufficient
+     * KEYBYTES == 16, but it could be 32 if you have the speed
+     */
     public void setKey(byte[] key) throws InvalidKeyException {
-        if (key.length != 16) {
-            throw new InvalidKeyException("Fatal: Key length must be 128 bits");
+        if (key.length != KEYBYTES) {
+            throw new InvalidKeyException("Fatal: Key length must be " + (KEYBYTES * 8) + " bits");
         }
         
         spritz.initialize();
