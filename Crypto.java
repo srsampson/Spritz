@@ -46,7 +46,7 @@ public final class Crypto {
         iv[1] = (byte) ((SN >>> 8) & 0xFF);
         iv[2] = (byte) (SN & 0xFF);             // lsb
 
-        spritz.getPrime();
+        spritz.getPrime();      // note: getPrime() inludes an absorbStop() internally
         spritz.absorb(iv);
     }
 
