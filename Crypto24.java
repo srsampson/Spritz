@@ -9,7 +9,7 @@
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
 
-public final class Crypto {
+public final class Crypto24 {
 
     private static final int KEYBYTES = 16;
     //
